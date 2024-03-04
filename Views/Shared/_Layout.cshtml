@@ -1,5 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Http
 @{
+    var userId = Context.Session.GetString("UserId");
+    var userName = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail"); 
+    var userRole = Context.Session.GetString("Role");
+
+    ViewBag.userId = userId;
 }
 <!DOCTYPE html>
 
@@ -52,6 +58,7 @@
                 <small class="ms-4"><i class="fa fa-envelope me-2"></i>hdnguyen.dev@gmail.com</small>
             </div>
             <div class="col-lg-6 px-5 text-end">
+        
                 <small>Follow us:</small>
                 <a class="text-white-50 ms-3" href=""><i class="fab fa-facebook-f"></i></a>
                 <a class="text-white-50 ms-3" href=""><i class="fab fa-twitter"></i></a>
@@ -74,7 +81,35 @@
                     <a href="about.html" class="nav-item nav-link">About</a>
                     <a href="causes.html" class="nav-item nav-link">Causes</a>
                     <a href="contact.html" class="nav-item nav-link">Contact</a>
+                    @if (!string.IsNullOrEmpty(userId))
+                    {
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true"> @userEmail</a>
+                            <div class="dropdown-menu m-0 show" data-bs-popper="none">
+                                <a class="dropdown-item" href="/Users/Details/@userId">
+                                    <i class="fas fa-user w-25 me-2"></i>Profile
+                                </a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Users" asp-action="Logout"><i class="fas fa-sign-out-alt w-25 me-2"></i>Logout</a>
+                            </div>
+                        </div>
+
+
+                    }
+                    else
+                    {
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">Join Us</a>
+                            <div class="dropdown-menu m-0 show" data-bs-popper="none">
+                                <a class="dropdown-item" href="/Users/Login"><i class="fas fa-sign-in-alt me-2 w-25"></i>Login</a>
+                                <a class="dropdown-item" href="/Users/Register"><i class="fas fa-user-plus me-2 w-25"></i>Register</a>
+                            </div>
+                        </div>
+
+                    }
                 </div>
+                
+                
+                
                 <div class="d-none d-lg-flex ms-2">
                     <a class="btn btn-outline-primary py-2 px-3" href="/donation">
                         Donate Now

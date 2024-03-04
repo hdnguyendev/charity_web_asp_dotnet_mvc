@@ -21,13 +21,159 @@ namespace DonationsWeb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DonationsWeb.Models.User", b =>
+            modelBuilder.Entity("DonationsWeb.Models.Comment", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CommentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comment");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Donation", b =>
+                {
+                    b.Property<int>("DonationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DonationId"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DonationId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Donation");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notification");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Project", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProjectId"));
+
+                    b.Property<int>("CurrentAmount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Desciption")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EndDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StartDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TotalAmount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProjectId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Project");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -49,9 +195,90 @@ namespace DonationsWeb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId");
 
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Comment", b =>
+                {
+                    b.HasOne("DonationsWeb.Models.Project", "Project")
+                        .WithMany("Comments")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DonationsWeb.Models.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Donation", b =>
+                {
+                    b.HasOne("DonationsWeb.Models.Project", "Project")
+                        .WithMany("Donations")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DonationsWeb.Models.User", "User")
+                        .WithMany("Donations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Notification", b =>
+                {
+                    b.HasOne("DonationsWeb.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Project", b =>
+                {
+                    b.HasOne("DonationsWeb.Models.User", "User")
+                        .WithMany("Projects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.Project", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Donations");
+                });
+
+            modelBuilder.Entity("DonationsWeb.Models.User", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Donations");
+
+                    b.Navigation("Notifications");
+
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }
