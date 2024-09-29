@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DonationsWeb.Data;
 using DonationsWeb.Models;
+using DonationsWeb.Filter;
 
 namespace DonationsWeb.Controllers
 {
+    [AdminAuthorizationFilter]
     public class NotificationsController : Controller
     {
         private readonly DonationsWebContext _context;

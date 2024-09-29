@@ -10,10 +10,12 @@ using DonationsWeb.Models;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis.Scripting;
+using DonationsWeb.Filter;
 
 namespace DonationsWeb.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    
     public class UsersController : Controller
     {
         private readonly DonationsWebContext _context;
@@ -21,6 +23,8 @@ namespace DonationsWeb.Controllers
         public UsersController(DonationsWebContext context)
         {
             _context = context;
+
+
         }
 
 
@@ -29,6 +33,8 @@ namespace DonationsWeb.Controllers
         {
             return HttpContext.Session.GetString("UserId") != null;
         }
+
+       
 
         // GET: Users/Login
 
@@ -84,6 +90,49 @@ namespace DonationsWeb.Controllers
 
         }
 
+        // POST: Users/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterAsync(User user)
+        {
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+
+            if (existingUser != null)
+            {
+                // Thêm lỗi vào ModelState
+                ModelState.AddModelError("Email", "Email already exists.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                var donorRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Donor");
+
+                if (donorRole != null)
+                {
+                    user.Role= donorRole;
+                    // Add user to the database
+                    _context.Add(user);
+                    await _context.SaveChangesAsync();
+
+                    // Redirect to login or another page
+                    // Save user in session
+                    HttpContext.Session.SetString("UserId", user.UserId.ToString());
+                    HttpContext.Session.SetString("UserName", user.Name);
+                    HttpContext.Session.SetString("UserEmail", user.Email);
+                    HttpContext.Session.SetString("RoleName", user.Role.RoleName);
+
+
+                    return RedirectToAction("Index", "Home");
+                }
+
+            }
+
+            // Nếu có lỗi, trả lại form kèm thông báo lỗi
+            return View(user);
+
+        }
+
+
         // GET: Users/Logout
 
         public IActionResult Logout()
@@ -94,13 +143,16 @@ namespace DonationsWeb.Controllers
 
 
         // GET: Users
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Index()
         {
+
             var donationsWebContext = _context.Users.Include(u => u.Role);
             return View(await donationsWebContext.ToListAsync());
         }
 
         // GET: Users/Details/5
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -120,6 +172,7 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Users/Create
+        [AdminAuthorizationFilter]
         public IActionResult Create()
         {
             var roles = _context.Roles
@@ -140,6 +193,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Create([Bind("UserId,Name,Email,Password,PhoneNumber,Address,RoleId")] User user)
         {
             if (ModelState.IsValid)
@@ -163,6 +217,7 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Users/Edit/5
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -192,6 +247,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Edit(int id, [Bind("UserId,Name,Email,Password,PhoneNumber,Address,RoleId")] User user)
         {
             if (id != user.UserId)
@@ -232,6 +288,7 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Users/Delete/5
+        [AdminAuthorizationFilter]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -251,6 +308,7 @@ namespace DonationsWeb.Controllers
         }
 
         // POST: Users/Delete/5
+        [AdminAuthorizationFilter]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

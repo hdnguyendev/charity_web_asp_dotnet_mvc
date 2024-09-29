@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DonationsWeb.Data;
 using DonationsWeb.Models;
+using DonationsWeb.Filter;
 
 namespace DonationsWeb.Controllers
 {
@@ -20,6 +21,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Campaigns
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Index()
         {
             var donationsWebContext = _context.Campaigns.Include(c => c.User);
@@ -54,6 +57,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Campaigns/Create
+        [AdminAuthorizationFilter]
+
         public IActionResult Create()
         {
             var users = _context.Users.Where(u => u.Role.RoleName == "Admin");
@@ -68,6 +73,8 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Create([Bind("CampaignId,Title,Description,StartDate,EndDate,Goal,CurrentAmount,UserId")] Campaign campaign, IFormFile Image)
         {
             if (ModelState.IsValid)
@@ -106,6 +113,8 @@ namespace DonationsWeb.Controllers
 
 
         // GET: Campaigns/Edit/5
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -129,6 +138,8 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Edit(int id, [Bind("CampaignId,Title,Description,StartDate,EndDate,Goal,CurrentAmount,UserId")] Campaign campaign, IFormFile? Image)
         {
             if (id != campaign.CampaignId)
@@ -193,6 +204,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Campaigns/Delete/5
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -212,6 +225,8 @@ namespace DonationsWeb.Controllers
         }
 
         // POST: Campaigns/Delete/5
+        [AdminAuthorizationFilter]
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

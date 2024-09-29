@@ -1,21 +1,28 @@
+using DonationsWeb.Data;
 using DonationsWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace DonationsWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly DonationsWebContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+
+        public HomeController(DonationsWebContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
-            return View();
+            // Retrieve 3 campaigns from the database
+            var campaigns = _context.Campaigns.Take(3).ToList();
+
+            // Pass the campaigns to the view
+            return View(campaigns);
         }
 
         public IActionResult Privacy()
