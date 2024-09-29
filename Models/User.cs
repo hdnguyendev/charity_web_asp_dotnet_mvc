@@ -1,4 +1,6 @@
-﻿namespace DonationsWeb.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DonationsWeb.Models
 {
     public class User
     {
@@ -8,10 +10,8 @@
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
-        public int Role { get; set; }
-        public ICollection<Notification>? Notifications { get; set; }
-        public ICollection<Comment>? Comments { get; set; }
-        public ICollection<Donation>? Donations { get; set; }
-        public ICollection<Project>? Projects { get; set; }
+        public int RoleId { get; set; }
+        public Role? Role { get; set; }
+ 
     }
 }

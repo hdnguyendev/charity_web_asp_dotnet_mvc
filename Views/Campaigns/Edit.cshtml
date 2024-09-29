@@ -1,0 +1,101 @@
+﻿@model DonationsWeb.Models.Campaign
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-12">
+        <form asp-action="Edit" class="border p-4 shadow-sm rounded" enctype="multipart/form-data">
+            <h4 class="mb-4">Edit Campaign</h4>
+            <input type="hidden" asp-for="CampaignId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" id="editor"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartDate" class="form-label">Start Date</label>
+                    <input asp-for="StartDate" type="date" class="form-control" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="EndDate" class="form-label">End Date</label>
+                    <input asp-for="EndDate" type="date" class="form-control" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Goal" class="form-label"></label>
+                <input asp-for="Goal" type="number" class="form-control" step="10" value="10000" />
+                <span asp-validation-for="Goal" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CurrentAmount" class="form-label">Current Amount</label>
+                <input asp-for="CurrentAmount" type="number" class="form-control" step="10" value="0" />
+                <span asp-validation-for="CurrentAmount" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Image" class="form-label"></label>
+                <input asp-for="Image" type="file" class="form-control" accept="image/*" onchange="previewImage(event)" value="@Model.Image" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+
+            <!-- Image Preview Section -->
+            <div class="form-group mb-3">
+                <img id="imagePreview" src="@Model.Image" alt="Image Preview" style="width: 100%; max-height: 300px; object-fit: cover; display: @(string.IsNullOrEmpty(Model.Image) ? "none" : "block");" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="UserId" class="form-label">Creator</label>
+                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
+            </div>
+
+            <div class="form-group text-end">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CKEditor Integration -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.0/classic/ckeditor.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#editor'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+
+<!-- Image Preview Script -->
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
+            output.style.display = 'block';
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

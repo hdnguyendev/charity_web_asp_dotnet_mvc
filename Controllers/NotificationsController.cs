@@ -22,7 +22,7 @@ namespace DonationsWeb.Controllers
         // GET: Notifications
         public async Task<IActionResult> Index()
         {
-            var donationsWebContext = _context.Notification.Include(n => n.User);
+            var donationsWebContext = _context.Notifications.Include(n => n.User);
             return View(await donationsWebContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var notification = await _context.Notification
+            var notification = await _context.Notifications
                 .Include(n => n.User)
                 .FirstOrDefaultAsync(m => m.NotificationId == id);
             if (notification == null)
@@ -48,7 +48,7 @@ namespace DonationsWeb.Controllers
         // GET: Notifications/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
             return View();
         }
 
@@ -57,7 +57,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NotificationId,Content,Date,Status,UserId")] Notification notification)
+        public async Task<IActionResult> Create([Bind("NotificationId,UserId,Message,IsRead,NotificationDate")] Notification notification)
         {
             if (ModelState.IsValid)
             {
@@ -65,7 +65,7 @@ namespace DonationsWeb.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", notification.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", notification.UserId);
             return View(notification);
         }
 
@@ -77,12 +77,12 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var notification = await _context.Notification.FindAsync(id);
+            var notification = await _context.Notifications.FindAsync(id);
             if (notification == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", notification.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", notification.UserId);
             return View(notification);
         }
 
@@ -91,7 +91,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NotificationId,Content,Date,Status,UserId")] Notification notification)
+        public async Task<IActionResult> Edit(int id, [Bind("NotificationId,UserId,Message,IsRead,NotificationDate")] Notification notification)
         {
             if (id != notification.NotificationId)
             {
@@ -118,7 +118,7 @@ namespace DonationsWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", notification.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", notification.UserId);
             return View(notification);
         }
 
@@ -130,7 +130,7 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var notification = await _context.Notification
+            var notification = await _context.Notifications
                 .Include(n => n.User)
                 .FirstOrDefaultAsync(m => m.NotificationId == id);
             if (notification == null)
@@ -146,10 +146,10 @@ namespace DonationsWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var notification = await _context.Notification.FindAsync(id);
+            var notification = await _context.Notifications.FindAsync(id);
             if (notification != null)
             {
-                _context.Notification.Remove(notification);
+                _context.Notifications.Remove(notification);
             }
 
             await _context.SaveChangesAsync();
@@ -158,7 +158,7 @@ namespace DonationsWeb.Controllers
 
         private bool NotificationExists(int id)
         {
-            return _context.Notification.Any(e => e.NotificationId == id);
+            return _context.Notifications.Any(e => e.NotificationId == id);
         }
     }
 }

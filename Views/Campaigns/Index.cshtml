@@ -1,0 +1,79 @@
+﻿@model IEnumerable<DonationsWeb.Models.Campaign>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="card-header d-flex justify-content-between align-items-center">
+    <h1 class="text-primary">✨CAMPAIGNS MANAGEMENT</h1>
+    <a asp-action="Create">
+        <div class="btn btn-success">
+            Create New
+        </div>
+    </a>
+</div>
+
+<table class="table table-bordered table-striped table-hover table-responsive-lg mt-5">
+    <thead class="text-center bg-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                Start Date
+            </th>
+            <th>
+                End Date
+            </th>
+            <th>
+                Current Amount
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Goal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.User)
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-center">
+                    @if (item.Image != null)
+                    {
+                        <img class="img-thumbnail" src="@item.Image" alt="Campaign Image" style="width: auto; height: 100px;" />
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    $@Html.DisplayFor(modelItem => item.CurrentAmount)
+                </td>
+                <td class="fw-bolder">
+                    $@Html.DisplayFor(modelItem => item.Goal)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.User.Name)
+                </td>
+                <td class="text-center">
+                    <a class="d-block my-1 btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@item.CampaignId">Edit</a>
+                    <a class="d-block my-1 btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.CampaignId">Details</a>
+                    <a class="d-block my-1 btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.CampaignId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

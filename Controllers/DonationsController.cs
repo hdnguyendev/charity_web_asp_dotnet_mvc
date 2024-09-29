@@ -22,7 +22,7 @@ namespace DonationsWeb.Controllers
         // GET: Donations
         public async Task<IActionResult> Index()
         {
-            var donationsWebContext = _context.Donation.Include(d => d.Project).Include(d => d.User);
+            var donationsWebContext = _context.Donations.Include(d => d.Campaign).Include(d => d.User);
             return View(await donationsWebContext.ToListAsync());
         }
 
@@ -34,8 +34,8 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var donation = await _context.Donation
-                .Include(d => d.Project)
+            var donation = await _context.Donations
+                .Include(d => d.Campaign)
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.DonationId == id);
             if (donation == null)
@@ -49,8 +49,8 @@ namespace DonationsWeb.Controllers
         // GET: Donations/Create
         public IActionResult Create()
         {
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId");
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
             return View();
         }
 
@@ -59,7 +59,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DonationId,Amount,Date,Note,Status,UserId,ProjectId")] Donation donation)
+        public async Task<IActionResult> Create([Bind("DonationId,UserId,CampaignId,Amount,DonationDate,Message")] Donation donation)
         {
             if (ModelState.IsValid)
             {
@@ -67,8 +67,8 @@ namespace DonationsWeb.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", donation.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", donation.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", donation.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", donation.UserId);
             return View(donation);
         }
 
@@ -80,13 +80,13 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var donation = await _context.Donation.FindAsync(id);
+            var donation = await _context.Donations.FindAsync(id);
             if (donation == null)
             {
                 return NotFound();
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", donation.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", donation.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", donation.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", donation.UserId);
             return View(donation);
         }
 
@@ -95,7 +95,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DonationId,Amount,Date,Note,Status,UserId,ProjectId")] Donation donation)
+        public async Task<IActionResult> Edit(int id, [Bind("DonationId,UserId,CampaignId,Amount,DonationDate,Message")] Donation donation)
         {
             if (id != donation.DonationId)
             {
@@ -122,8 +122,8 @@ namespace DonationsWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", donation.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", donation.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", donation.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", donation.UserId);
             return View(donation);
         }
 
@@ -135,8 +135,8 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var donation = await _context.Donation
-                .Include(d => d.Project)
+            var donation = await _context.Donations
+                .Include(d => d.Campaign)
                 .Include(d => d.User)
                 .FirstOrDefaultAsync(m => m.DonationId == id);
             if (donation == null)
@@ -152,10 +152,10 @@ namespace DonationsWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var donation = await _context.Donation.FindAsync(id);
+            var donation = await _context.Donations.FindAsync(id);
             if (donation != null)
             {
-                _context.Donation.Remove(donation);
+                _context.Donations.Remove(donation);
             }
 
             await _context.SaveChangesAsync();
@@ -164,7 +164,7 @@ namespace DonationsWeb.Controllers
 
         private bool DonationExists(int id)
         {
-            return _context.Donation.Any(e => e.DonationId == id);
+            return _context.Donations.Any(e => e.DonationId == id);
         }
     }
 }

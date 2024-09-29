@@ -1,0 +1,123 @@
+﻿@model DonationsWeb.Models.Campaign
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Campaign Details</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary">
+            <h4 class="mb-0 text-white">Campaign: @Html.DisplayFor(model => model.Title)</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.Description)
+                </dt>
+                <dd class="col-sm-9">
+                    <div id="description" class="ck-content">
+                        @Html.Raw(Model.Description)
+                    </div>
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.StartDate)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.StartDate)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.EndDate)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.EndDate)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.Goal)
+                </dt>
+                <dd class="col-sm-9">
+                    $ @Html.DisplayFor(model => model.Goal)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.CurrentAmount)
+                </dt>
+                <dd class="col-sm-9">
+                    $ @Html.DisplayFor(model => model.CurrentAmount)
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.Image)
+                </dt>
+                <dd class="col-sm-9">
+                    <img src="@Model.Image" class="img-fluid rounded shadow-sm" alt="Campaign Image" />
+                </dd>
+                <dt class="col-sm-3">
+                    @Html.DisplayNameFor(model => model.User)
+                </dt>
+                <dd class="col-sm-9">
+                    @Html.DisplayFor(model => model.User.Name)
+                </dd>
+            </dl>
+        </div>
+
+        <!-- Donations Table -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Donations for this Campaign</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Donations == null || !Model.Donations.Any())
+                {
+                    <p class="text-center">No donations have been made for this campaign yet.</p>
+                }
+                else
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Donor Name</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Donations.Count; i++)
+                            {
+                                var donation = Model.Donations.ElementAt(i); // Access donation using ElementAt
+                                <tr>
+                                    <td>@(i + 1)</td> <!-- Serial number -->
+                                    <td>@Html.DisplayFor(modelItem => donation.User.Name)</td>
+                                    <td>$@Html.DisplayFor(modelItem => donation.Amount)</td>
+                                    <td>@Html.DisplayFor(modelItem => donation.DonationDate)</td> <!-- Format date -->
+                                    <td>@Html.DisplayFor(modelItem => donation.Message)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer text-end">
+            <a asp-action="Edit" asp-route-id="@Model?.CampaignId" class="btn btn-warning">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+
+<!-- Include CKEditor for potential future use -->
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.0/classic/ckeditor.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#description'), {
+            toolbar: [], // Disable toolbar for read-only view
+        }).then(editor => {
+            editor.isReadOnly = true; // Set the editor to read-only
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>

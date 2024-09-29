@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<DonationsWeb.Models.User>
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "User Management";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -44,7 +44,8 @@
                 @Html.DisplayFor(modelItem => item.Email)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Password)
+                @* @Html.DisplayFor(modelItem => item.Password) *@
+                ******
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.PhoneNumber)
@@ -53,7 +54,7 @@
                 @Html.DisplayFor(modelItem => item.Address)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Role)
+                @Html.DisplayFor(modelItem => item.Role.RoleName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |

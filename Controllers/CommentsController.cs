@@ -22,7 +22,7 @@ namespace DonationsWeb.Controllers
         // GET: Comments
         public async Task<IActionResult> Index()
         {
-            var donationsWebContext = _context.Comment.Include(c => c.Project).Include(c => c.User);
+            var donationsWebContext = _context.Comments.Include(c => c.Campaign).Include(c => c.User);
             return View(await donationsWebContext.ToListAsync());
         }
 
@@ -34,8 +34,8 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var comment = await _context.Comment
-                .Include(c => c.Project)
+            var comment = await _context.Comments
+                .Include(c => c.Campaign)
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.CommentId == id);
             if (comment == null)
@@ -49,8 +49,8 @@ namespace DonationsWeb.Controllers
         // GET: Comments/Create
         public IActionResult Create()
         {
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId");
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId");
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId");
             return View();
         }
 
@@ -59,7 +59,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CommentId,Rating,Content,Date,Status,UserId,ProjectId")] Comment comment)
+        public async Task<IActionResult> Create([Bind("CommentId,CampaignId,UserId,Content,CommentDate")] Comment comment)
         {
             if (ModelState.IsValid)
             {
@@ -67,8 +67,8 @@ namespace DonationsWeb.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", comment.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", comment.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", comment.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", comment.UserId);
             return View(comment);
         }
 
@@ -80,13 +80,13 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var comment = await _context.Comment.FindAsync(id);
+            var comment = await _context.Comments.FindAsync(id);
             if (comment == null)
             {
                 return NotFound();
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", comment.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", comment.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", comment.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", comment.UserId);
             return View(comment);
         }
 
@@ -95,7 +95,7 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CommentId,Rating,Content,Date,Status,UserId,ProjectId")] Comment comment)
+        public async Task<IActionResult> Edit(int id, [Bind("CommentId,CampaignId,UserId,Content,CommentDate")] Comment comment)
         {
             if (id != comment.CommentId)
             {
@@ -122,8 +122,8 @@ namespace DonationsWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProjectId"] = new SelectList(_context.Project, "ProjectId", "ProjectId", comment.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.User, "UserId", "UserId", comment.UserId);
+            ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId", comment.CampaignId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", comment.UserId);
             return View(comment);
         }
 
@@ -135,8 +135,8 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var comment = await _context.Comment
-                .Include(c => c.Project)
+            var comment = await _context.Comments
+                .Include(c => c.Campaign)
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.CommentId == id);
             if (comment == null)
@@ -152,10 +152,10 @@ namespace DonationsWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var comment = await _context.Comment.FindAsync(id);
+            var comment = await _context.Comments.FindAsync(id);
             if (comment != null)
             {
-                _context.Comment.Remove(comment);
+                _context.Comments.Remove(comment);
             }
 
             await _context.SaveChangesAsync();
@@ -164,7 +164,7 @@ namespace DonationsWeb.Controllers
 
         private bool CommentExists(int id)
         {
-            return _context.Comment.Any(e => e.CommentId == id);
+            return _context.Comments.Any(e => e.CommentId == id);
         }
     }
 }

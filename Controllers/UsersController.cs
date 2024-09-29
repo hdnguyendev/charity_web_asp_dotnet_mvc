@@ -7,10 +7,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DonationsWeb.Data;
 using DonationsWeb.Models;
-using Microsoft.IdentityModel.Tokens;
+using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace DonationsWeb.Controllers
 {
+    //[Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly DonationsWebContext _context;
@@ -19,98 +22,82 @@ namespace DonationsWeb.Controllers
         {
             _context = context;
         }
+
+
+        // Check if user is logged in
+        private bool IsUserLoggedIn()
+        {
+            return HttpContext.Session.GetString("UserId") != null;
+        }
+
         // GET: Users/Login
+
         public IActionResult Login()
         {
+            if (IsUserLoggedIn())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View();
         }
-        // GET: Users/Login
+
+        // GET: Users/Register
+
         public IActionResult Register()
         {
+
+            if (IsUserLoggedIn())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View();
         }
+
+
         // POST: Users/Login
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password)
+        public IActionResult Login(string email, string password)
         {
-            // Kiểm tra thông tin đăng nhập
-            var user = await _context.User.FirstOrDefaultAsync(u => u.Email == email);
+            var userDb = _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email == email && u.Password == password);
 
-            if (user == null)
+            if (userDb == null)
             {
-                // Email không tồn tại, hiển thị thông báo lỗi
-                ModelState.AddModelError("Email", "Email này chưa đăng ký tài khoản trên hệ thống.");
-                return View(user);
+                ModelState.AddModelError("Email", "Invalid email or password");
+                return View(userDb);
             }
 
-            if (user.Password != password)
-            {
-                // Mật khẩu không chính xác, hiển thị thông báo lỗi
-                ModelState.AddModelError("Password", "Mật khẩu không chính xác.");
-                return View(user);
-            }
-            // Lưu thông tin người dùng đã đăng nhập vào session
-            HttpContext.Session.SetString("UserId", user.UserId.ToString());
-            HttpContext.Session.SetString("UserName", user.Name.ToString());
-            HttpContext.Session.SetString("UserEmail", user.Email.ToString());
-            HttpContext.Session.SetString("Role", user.Role.ToString());
+
+            // Save user in session
+            HttpContext.Session.SetString("UserId", userDb.UserId.ToString());
+            HttpContext.Session.SetString("UserName", userDb.Name);
+            HttpContext.Session.SetString("UserEmail", userDb.Email);
+            HttpContext.Session.SetString("RoleName", userDb.Role.RoleName);
 
 
-
-            // Điều hướng tới action hoặc trang chính sau khi đăng nhập thành công
             return RedirectToAction("Index", "Home");
+
         }
-        // GET: Customers/Logout
+
+        // GET: Users/Logout
+
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
-        // POST: Users/Register
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register([Bind("Name,Email,Password,PhoneNumber,Address")] User user, string role)
-        {
 
-            // Kiểm tra xem email đã tồn tại trong hệ thống hay chưa
-            bool emailExists = await _context.User.AnyAsync(u => u.Email == user.Email);
-
-            if (emailExists)
-            {
-                ModelState.AddModelError("Email", "Email đã tồn tại trong hệ thống.");
-                // Trả về view với lỗi
-                return View(user);
-            }
-            if (role == "Contributter")
-            {
-                user.Role = 1;
-            }
-            else if (role == "Organization") 
-            {
-                user.Role = 2;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-            }
-            if (ModelState.IsValid)
-            {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Login));
-            }
-            return View(user);
-        }
         // GET: Users
         public async Task<IActionResult> Index()
-
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
-            return View(await _context.User.ToListAsync());
+            var donationsWebContext = _context.Users.Include(u => u.Role);
+            return View(await donationsWebContext.ToListAsync());
         }
 
         // GET: Users/Details/5
@@ -121,7 +108,8 @@ namespace DonationsWeb.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await _context.Users
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (user == null)
             {
@@ -134,11 +122,16 @@ namespace DonationsWeb.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
+            var roles = _context.Roles
+            .Select(r => new SelectListItem
             {
-                return RedirectToAction(nameof(Login));
-            }
+                Value = r.RoleId.ToString(),
+                Text = r.RoleName
+            })
+            .ToList();
+
+            ViewBag.RoleId = roles;
+
             return View();
         }
 
@@ -147,40 +140,50 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,Name,Email,Password,PhoneNumber,Address,Role")] User user)
+        public async Task<IActionResult> Create([Bind("UserId,Name,Email,Password,PhoneNumber,Address,RoleId")] User user)
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
             if (ModelState.IsValid)
             {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
             }
+
+            // Reload roles if model is invalid
+            var roles = _context.Roles
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RoleId.ToString(),
+                    Text = r.RoleName
+                })
+                .ToList();
+
+            ViewBag.RoleId = roles;
             return View(user);
         }
 
         // GET: Users/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
             if (id == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
+            var roles = _context.Roles
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RoleId.ToString(),
+                    Text = r.RoleName
+                })
+                .ToList();
+
+            ViewBag.RoleId = roles;
             return View(user);
         }
 
@@ -189,13 +192,8 @@ namespace DonationsWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserId,Name,Email,Password,PhoneNumber,Address,Role")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("UserId,Name,Email,Password,PhoneNumber,Address,RoleId")] User user)
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
             if (id != user.UserId)
             {
                 return NotFound();
@@ -221,23 +219,28 @@ namespace DonationsWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            var roles = _context.Roles
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RoleId.ToString(),
+                    Text = r.RoleName
+                })
+                .ToList();
+
+            ViewBag.RoleId = roles;
             return View(user);
         }
 
         // GET: Users/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
             if (id == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await _context.Users
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(m => m.UserId == id);
             if (user == null)
             {
@@ -252,15 +255,10 @@ namespace DonationsWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            string? role = HttpContext.Session.GetString("Role");
-            if (role.IsNullOrEmpty() || role.Equals("1") || role.Equals("2"))
-            {
-                return RedirectToAction(nameof(Login));
-            }
-            var user = await _context.User.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
-                _context.User.Remove(user);
+                _context.Users.Remove(user);
             }
 
             await _context.SaveChangesAsync();
@@ -269,7 +267,7 @@ namespace DonationsWeb.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.UserId == id);
+            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

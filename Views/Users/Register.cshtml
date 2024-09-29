@@ -1,16 +1,16 @@
 ﻿@model DonationsWeb.Models.User
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Register Page";
 }
-<section class="vh-100 bg-dark">
-    <div class="container py-5 h-100">
-        <div class="row d-flex justify-content-center align-items-center h-100">
+
+<section class="bg-dark">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
             <div class="col col-xl-10">
                 <div class="card" style="border-radius: 1rem;">
                     <div class="row g-0">
                         <div class="col-md-6 col-lg-7">
                             <div class="card-body p-4 p-lg-5 text-black">
-
                                 <form asp-action="Register" method="post">
                                     <h1 class="fw-bold text-primary mb-4"><span class="text-dark">Circle Of </span>
                                         Charity</h1>
@@ -28,34 +28,20 @@
                                     </div>
                                     <div class="form-floating mb-4">
                                         <input type="number" id="formPhoneNumber" asp-for="PhoneNumber" pattern="^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$"
-                                            title="Sai định dạng số điện thoại!" required
+                                            title="Wrong phone number format" required
                                             class="form-control form-control-lg" />
                                         <label class="form-label" for="formPhoneNumber">Phone number</label>
                                     </div>
                                     <div class="form-floating mb-4">
-                                        <input type="email" id="formEmail" asp-for="Email"
+                                        <input type="email" id="formEmail" asp-for="Email" required
                                             class="form-control form-control-lg" />
                                         <label class="form-label" for="formEmail">Email address</label>
                                     </div>
-                                    <div class="form-floating mb-4">
+                                    <div class="form-floating">
                                         <input type="password" id="formPassword" asp-for="Password"
-                                            class="form-control form-control-lg" pattern="^\w{6,}$"   title="Mật khẩu phải có ít nhất 6 ký tự!" required
-                                           />
+                                            class="form-control form-control-lg" pattern="^\w{6,}$"   title="Password must be at least 6 character" required
+/>
                                         <label class="form-label" for="formPassword">Password</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="Role" value="Contributter"
-                                            id="flexRadioContributter" checked>
-                                        <label class="form-check-label" for="flexRadioContributter">
-                                            Contributter
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="Role" value="Organization"
-                                            id="flexRadioOrganization" >
-                                        <label class="form-check-label" for="flexRadioOrganization">
-                                            Organization
-                                        </label>
                                     </div>
                                     <label class="alert text-danger m-0 p-0">
                                         @Html.ValidationSummary()
