@@ -11,7 +11,6 @@ using DonationsWeb.Filter;
 
 namespace DonationsWeb.Controllers
 {
-    [AdminAuthorizationFilter]
     public class DonationsController : Controller
     {
         private readonly DonationsWebContext _context;
@@ -22,6 +21,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Donations
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Index()
         {
             var donationsWebContext = _context.Donations.Include(d => d.Campaign).Include(d => d.User);
@@ -29,6 +30,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Donations/Details/5
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -49,6 +52,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Donations/Create
+        [AdminAuthorizationFilter]
+
         public IActionResult Create()
         {
             ViewData["CampaignId"] = new SelectList(_context.Campaigns, "CampaignId", "CampaignId");
@@ -56,11 +61,57 @@ namespace DonationsWeb.Controllers
             return View();
         }
 
+        // POST: Donations/Donate
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Donate(int UserId, int CampaignId, float Amount, string Message)
+        {
+            // check if user exists
+            if (!_context.Users.Any(u => u.UserId == UserId))
+            {
+                return Json(new { success = false, message = "User not found" });
+            }
+
+            // check if campaign exists
+            if (!_context.Campaigns.Any(c => c.CampaignId == CampaignId))
+            {
+                return Json(new { success = false, message = "Campaign not found" });
+
+            }
+
+
+
+
+            // save donate
+            Donation donation = new Donation
+            {
+                UserId = UserId,
+                CampaignId = CampaignId,
+                Amount = Amount,
+                Message = Message,
+                DonationDate = DateTime.Now
+            };
+
+            _context.Donations.Add(donation);
+            // update campaign amount
+            var campaign = _context.Campaigns.Find(CampaignId);
+            if (campaign != null)
+            {
+                campaign.CurrentAmount += Amount; // Cập nhật số tiền quyên góp
+                _context.Campaigns.Update(campaign);
+            }
+            _context.SaveChanges();
+            return Json(new { success = true, message = "Donation successful!" });
+
+        }
+
         // POST: Donations/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Create([Bind("DonationId,UserId,CampaignId,Amount,DonationDate,Message")] Donation donation)
         {
             if (ModelState.IsValid)
@@ -75,6 +126,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Donations/Edit/5
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -93,6 +146,8 @@ namespace DonationsWeb.Controllers
         }
 
         // POST: Donations/Edit/5
+        [AdminAuthorizationFilter]
+
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -130,6 +185,8 @@ namespace DonationsWeb.Controllers
         }
 
         // GET: Donations/Delete/5
+        [AdminAuthorizationFilter]
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -151,6 +208,8 @@ namespace DonationsWeb.Controllers
 
         // POST: Donations/Delete/5
         [HttpPost, ActionName("Delete")]
+        [AdminAuthorizationFilter]
+
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

@@ -38,13 +38,13 @@
 
             <div class="form-group mb-3">
                 <label asp-for="Goal" class="form-label"></label>
-                <input asp-for="Goal" type="number" class="form-control" step="10" value="10000" />
+                <input asp-for="Goal" type="number" class="form-control" />
                 <span asp-validation-for="Goal" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
                 <label asp-for="CurrentAmount" class="form-label">Current Amount</label>
-                <input asp-for="CurrentAmount" type="number" class="form-control" step="10" value="0" />
+                <input asp-for="CurrentAmount" type="number" class="form-control" />
                 <span asp-validation-for="CurrentAmount" class="text-danger"></span>
             </div>
 
